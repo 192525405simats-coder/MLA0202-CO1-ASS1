@@ -1,1 +1,34 @@
 
+import pandas as pd
+from sklearn.naive_bayes import GaussianNB
+
+# Sample dataset
+data = {
+    "Fever": [1, 1, 0, 1, 0, 0, 1, 0],
+    "Cough": [1, 1, 1, 0, 0, 1, 1, 0],
+    "Headache": [1, 0, 1, 1, 0, 0, 1, 0],
+    "Flu": [1, 1, 0, 1, 0, 0, 1, 0]
+}
+
+df = pd.DataFrame(data)
+
+X = df[["Fever", "Cough", "Headache"]]
+y = df["Flu"]
+
+# Train model
+model = GaussianNB()
+model.fit(X, y)
+
+# New patient
+patient = pd.DataFrame({
+    "Fever": [1],
+    "Cough": [1],
+    "Headache": [1]
+})
+
+prediction = model.predict(patient)
+
+if prediction[0] == 1:
+    print("Prediction: Patient has Flu")
+else:
+    print("Prediction: Patient does NOT have Flu")
