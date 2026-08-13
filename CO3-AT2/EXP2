@@ -1,1 +1,52 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA, FactorAnalysis, FastICA
+from sklearn.mixture import GaussianMixture
 
+# Create dataset directly
+data = pd.DataFrame({
+    "Sample":[1,2,3,4,5,6,7,8,9,10],
+    "Alcohol":[14.23,13.20,13.16,14.37,13.24,14.20,14.39,14.06,14.83,13.86],
+    "MalicAcid":[1.71,1.78,2.36,1.95,2.59,1.76,1.87,2.15,1.64,1.35],
+    "Ash":[2.43,2.14,2.67,2.50,2.87,2.45,2.45,2.61,2.17,2.27],
+    "Alcalinity":[15.6,11.2,18.6,16.8,21.0,15.2,14.6,17.6,14.0,16.0],
+    "Magnesium":[127,100,101,113,118,112,96,121,97,98],
+    "Phenols":[2.80,2.65,2.80,3.85,2.80,3.27,2.50,2.60,2.80,2.98]
+})
+
+print(data)
+
+X = data.iloc[:,1:]
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+fa = FactorAnalysis(n_components=2)
+X_fa = fa.fit_transform(X_scaled)
+
+ica = FastICA(n_components=2, random_state=42)
+X_ica = ica.fit_transform(X_scaled)
+
+gmm = GaussianMixture(n_components=3, random_state=42)
+labels = gmm.fit_predict(X_pca)
+
+plt.figure(figsize=(15,4))
+
+plt.subplot(131)
+plt.scatter(X_pca[:,0], X_pca[:,1], c=labels)
+plt.title("PCA + GMM")
+
+plt.subplot(132)
+plt.scatter(X_fa[:,0], X_fa[:,1], c=labels)
+plt.title("Factor Analysis")
+
+plt.subplot(133)
+plt.scatter(X_ica[:,0], X_ica[:,1], c=labels)
+plt.title("ICA")
+
+plt.tight_layout()
+plt.show()
