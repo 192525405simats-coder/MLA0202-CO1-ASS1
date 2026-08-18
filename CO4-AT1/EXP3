@@ -1,1 +1,41 @@
+import numpy as np
 
+# Small noisy grayscale image
+image = np.array([
+    [10, 12, 11, 10],
+    [12, 100, 14, 13],
+    [11, 15, 90, 12],
+    [10, 13, 14, 11]
+])
+
+print("Original Image:")
+print(image)
+
+# Create updated image
+updated = image.copy()
+
+rows, cols = image.shape
+
+# One iteration of smoothing
+for i in range(rows):
+    for j in range(cols):
+
+        neighbors = []
+
+        if i > 0:
+            neighbors.append(image[i - 1, j])
+
+        if i < rows - 1:
+            neighbors.append(image[i + 1, j])
+
+        if j > 0:
+            neighbors.append(image[i, j - 1])
+
+        if j < cols - 1:
+            neighbors.append(image[i, j + 1])
+
+        # Average neighboring pixels
+        updated[i, j] = np.mean(neighbors)
+
+print("\nUpdated Image:")
+print(updated)
