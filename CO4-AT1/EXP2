@@ -1,1 +1,50 @@
+# Install: pip install hmmlearn
 
+import numpy as np
+from hmmlearn import hmm
+
+# Hidden states:
+# 0 = Sunny
+# 1 = Cloudy
+# 2 = Rainy
+
+model = hmm.CategoricalHMM(n_components=3, random_state=42)
+
+# Initial probabilities
+model.startprob_ = np.array([
+    0.5,  # Sunny
+    0.3,  # Cloudy
+    0.2   # Rainy
+])
+
+# Transition probabilities
+model.transmat_ = np.array([
+    [0.7, 0.2, 0.1],
+    [0.3, 0.4, 0.3],
+    [0.2, 0.3, 0.5]
+])
+
+# Emission probabilities
+# Observations:
+# 0 = Dry
+# 1 = Humid
+# 2 = Wet
+
+model.emissionprob_ = np.array([
+    [0.8, 0.15, 0.05],  # Sunny
+    [0.3, 0.5, 0.2],    # Cloudy
+    [0.1, 0.3, 0.6]     # Rainy
+])
+
+# Observation sequence
+observations = np.array([[0], [1], [2], [2], [1]])
+
+# Predict hidden states
+states = model.predict(observations)
+
+weather = ["Sunny", "Cloudy", "Rainy"]
+
+print("Predicted hidden weather states:")
+
+for state in states:
+    print(weather[state])
