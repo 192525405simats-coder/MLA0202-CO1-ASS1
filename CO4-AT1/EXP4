@@ -1,1 +1,84 @@
+# Install:
+# pip install sklearn-crfsuite
 
+import sklearn_crfsuite
+
+# Features for each word
+def word_features(sentence, i):
+    word = sentence[i]
+
+    features = {
+        'word.lower()': word.lower(),
+        'word.isupper()': word.isupper(),
+        'word.istitle()': word.istitle(),
+        'word.isdigit()': word.isdigit(),
+        'word.length': len(word)
+    }
+
+    if i > 0:
+        features['previous_word'] = sentence[i - 1].lower()
+    else:
+        features['BOS'] = True
+
+    if i < len(sentence) - 1:
+        features['next_word'] = sentence[i + 1].lower()
+    else:
+        features['EOS'] = True
+
+    return features
+
+
+# Training sentences
+sentences = [
+    ["John", "ordered", "Laptop", "ORD123"],
+    ["Alice", "bought", "Phone", "ORD456"],
+    ["Robert", "purchased", "Tablet", "ORD789"]
+]
+
+# Labels:
+# PER = Customer Name
+# PROD = Product Name
+# ORDER = Order ID
+# O = Other
+
+labels = [
+    ["PER", "O", "PROD", "ORDER"],
+    ["PER", "O", "PROD", "ORDER"],
+    ["PER", "O", "PROD", "ORDER"]
+]
+
+# Create training features
+X = []
+
+for sentence in sentences:
+    X.append([
+        word_features(sentence, i)
+        for i in range(len(sentence))
+    ])
+
+# Train CRF
+crf = sklearn_crfsuite.CRF(
+    algorithm='lbfgs',
+    max_iterations=100
+)
+
+crf.fit(X, labels)
+
+# New sentence
+test_sentence = ["David", "ordered", "Laptop", "ORD999"]
+
+test_X = [[
+    word_features(test_sentence, i)
+    for i in range(len(test_sentence))
+]]
+
+# Prediction
+prediction = crf.predict(test_X)
+
+print("Sentence:")
+print(test_sentence)
+
+print("\nPredicted Labels:")
+
+for word, label in zip(test_sentence, prediction[0]):
+    print(word, "->", label)
