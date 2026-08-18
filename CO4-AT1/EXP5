@@ -1,1 +1,74 @@
+# Install:
+# pip install pgmpy pandas
 
+import pandas as pd
+from pgmpy.estimators import HillClimbSearch, BayesianEstimator
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.inference import VariableElimination
+
+# Create sample historical data
+data = pd.DataFrame({
+    'Age': [
+        'Young', 'Young', 'Young',
+        'Middle', 'Middle', 'Middle',
+        'Old', 'Old', 'Old',
+        'Young', 'Middle', 'Old'
+    ],
+
+    'Income': [
+        'Low', 'High', 'Low',
+        'High', 'Low', 'High',
+        'High', 'Low', 'High',
+        'High', 'Low', 'Low'
+    ],
+
+    'Vehicle': [
+        'Car', 'Bike', 'Car',
+        'Car', 'Bike', 'Car',
+        'Car', 'Bike', 'Car',
+        'Bike', 'Bike', 'Car'
+    ],
+
+    'Claim': [
+        'No', 'No', 'Yes',
+        'No', 'Yes', 'No',
+        'Yes', 'Yes', 'No',
+        'No', 'Yes', 'Yes'
+    ]
+})
+
+print("Historical Data:")
+print(data)
+
+# Learn network structure
+hc = HillClimbSearch(data)
+best_model = hc.estimate()
+
+print("\nLearned Network Structure:")
+print(list(best_model.edges()))
+
+# Create Bayesian Network using learned edges
+model = DiscreteBayesianNetwork(best_model.edges())
+
+# Learn CPT parameters
+model.fit(
+    data,
+    estimator=BayesianEstimator,
+    prior_type='BDeu'
+)
+
+# Inference
+inference = VariableElimination(model)
+
+# New customer
+result = inference.query(
+    variables=['Claim'],
+    evidence={
+        'Age': 'Middle',
+        'Income': 'High',
+        'Vehicle': 'Car'
+    }
+)
+
+print("\nPrediction for New Customer:")
+print(result)
