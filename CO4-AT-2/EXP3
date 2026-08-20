@@ -1,1 +1,148 @@
+# Q3: Named Entity Recognition using Conditional Random Field
 
+import sklearn_crfsuite
+from sklearn_crfsuite import metrics
+
+# Feature extraction function
+def word_features(sentence, i):
+
+    word = sentence[i]
+
+    features = {
+        'word.lower()': word.lower(),
+        'word.isupper()': word.isupper(),
+        'word.istitle()': word.istitle(),
+        'word.isdigit()': word.isdigit(),
+        'word.length': len(word),
+        'prefix-2': word[:2],
+        'suffix-2': word[-2:],
+    }
+
+    if i > 0:
+        previous = sentence[i - 1]
+
+        features.update({
+            '-1:word.lower()': previous.lower(),
+            '-1:word.istitle()': previous.istitle()
+        })
+    else:
+        features['BOS'] = True
+
+    if i < len(sentence) - 1:
+        next_word = sentence[i + 1]
+
+        features.update({
+            '+1:word.lower()': next_word.lower(),
+            '+1:word.istitle()': next_word.istitle()
+        })
+    else:
+        features['EOS'] = True
+
+    return features
+
+
+def sentence_features(sentence):
+    return [
+        word_features(sentence, i)
+        for i in range(len(sentence))
+    ]
+
+
+# Training sentences
+sentences = [
+    ['John', 'ordered', 'a', 'Laptop', 'with', 'Order', '1001', 'and', 'has', 'Battery', 'Issue'],
+    ['Mary', 'bought', 'a', 'Phone', 'with', 'Order', '1002', 'and', 'reports', 'Screen', 'Issue'],
+    ['David', 'purchased', 'a', 'Tablet', 'with', 'Order', '1003', 'and', 'has', 'Charging', 'Issue'],
+    ['Alice', 'ordered', 'a', 'Laptop', 'with', 'Order', '1004', 'and', 'has', 'Keyboard', 'Issue']
+]
+
+# BIO labels
+labels = [
+    ['B-CUSTOMER', 'O', 'O', 'B-PRODUCT',
+     'O', 'O', 'B-ORDER', 'O', 'O', 'B-ISSUE', 'I-ISSUE'],
+
+    ['B-CUSTOMER', 'O', 'O', 'B-PRODUCT',
+     'O', 'O', 'B-ORDER', 'O', 'O', 'B-ISSUE', 'I-ISSUE'],
+
+    ['B-CUSTOMER', 'O', 'O', 'B-PRODUCT',
+     'O', 'O', 'B-ORDER', 'O', 'O', 'B-ISSUE', 'I-ISSUE'],
+
+    ['B-CUSTOMER', 'O', 'O', 'B-PRODUCT',
+     'O', 'O', 'B-ORDER', 'O', 'O', 'B-ISSUE', 'I-ISSUE']
+]
+
+# Convert sentences to features
+X_train = [
+    sentence_features(sentence)
+    for sentence in sentences
+]
+
+y_train = labels
+
+# 1. Create and train CRF
+crf = sklearn_crfsuite.CRF(
+    algorithm='lbfgs',
+    c1=0.1,
+    c2=0.1,
+    max_iterations=100,
+    all_possible_transitions=True
+)
+
+crf.fit(X_train, y_train)
+
+# 2. Predict a new customer email
+test_sentence = [
+    'Robert',
+    'ordered',
+    'a',
+    'Laptop',
+    'with',
+    'Order',
+    '2001',
+    'and',
+    'has',
+    'Battery',
+    'Issue'
+]
+
+X_test = [
+    sentence_features(test_sentence)
+]
+
+prediction = crf.predict(X_test)[0]
+
+print("Customer Support Email:")
+print(" ".join(test_sentence))
+
+print("\nPredicted Entities:")
+
+for word, label in zip(test_sentence, prediction):
+    print(word, "->", label)
+
+# 3. Evaluate training performance
+y_pred = crf.predict(X_train)
+
+f1_score = metrics.flat_f1_score(
+    y_train,
+    y_pred,
+    average='weighted',
+    labels=crf.classes_
+)
+
+print("\nCRF Training F1 Score:", round(f1_score, 4))
+
+print("\nClassification Report:")
+print(
+    metrics.flat_classification_report(
+        y_train,
+        y_pred,
+        labels=crf.classes_
+    )
+)
+
+# 4. Interpretation
+print("\nInterpretation:")
+print("CRF identifies Customer Name, Product Name, Order ID")
+print("and Issue Type from customer support messages.")
+print("This automates information extraction and helps CRM systems")
+print("process large numbers of customer emails efficiently.")
