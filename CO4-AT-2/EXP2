@@ -1,1 +1,98 @@
+# Q2: Predictive Machine Maintenance using Hidden Markov Model
 
+import numpy as np
+from hmmlearn import hmm
+
+# Hidden states
+states = ['Healthy', 'Warning', 'Failure']
+
+# Observation symbols
+# 0 = Normal sensors
+# 1 = Moderate sensors
+# 2 = High sensors
+
+observations = {
+    'Normal': 0,
+    'Moderate': 1,
+    'High': 2
+}
+
+# 1. Create HMM
+model = hmm.CategoricalHMM(
+    n_components=3,
+    random_state=42
+)
+
+# Initial probabilities
+model.startprob_ = np.array([
+    0.70,   # Healthy
+    0.25,   # Warning
+    0.05    # Failure
+])
+
+# 2. Transition probabilities
+model.transmat_ = np.array([
+    [0.80, 0.18, 0.02],  # Healthy -> states
+    [0.10, 0.70, 0.20],  # Warning -> states
+    [0.00, 0.20, 0.80]   # Failure -> states
+])
+
+# Emission probabilities
+# Columns: Normal, Moderate, High
+model.emissionprob_ = np.array([
+    [0.85, 0.14, 0.01],  # Healthy
+    [0.20, 0.60, 0.20],  # Warning
+    [0.02, 0.18, 0.80]   # Failure
+])
+
+# Sensor observation sequence
+sensor_sequence = [
+    'Normal',
+    'Normal',
+    'Moderate',
+    'Moderate',
+    'High',
+    'High'
+]
+
+# Convert observations to numbers
+X = np.array([
+    [observations[x]]
+    for x in sensor_sequence
+])
+
+# 3. Predict hidden states
+log_probability, hidden_states = model.decode(
+    X,
+    algorithm='viterbi'
+)
+
+print("Sensor Observations:")
+print(sensor_sequence)
+
+print("\nPredicted Hidden States:")
+
+for i, state in enumerate(hidden_states):
+    print(
+        "Time", i + 1,
+        ":", sensor_sequence[i],
+        "->",
+        states[state]
+    )
+
+print("\nLog Probability:", log_probability)
+
+# 4. Maintenance interpretation
+print("\nInterpretation:")
+
+if 2 in hidden_states:
+    print("WARNING: Machine is predicted to reach FAILURE.")
+    print("Preventive maintenance should be scheduled immediately.")
+elif 1 in hidden_states:
+    print("Machine shows WARNING condition.")
+    print("Maintenance should be planned soon.")
+else:
+    print("Machine is operating in a HEALTHY condition.")
+
+print("\nHMM helps predict hidden machine conditions")
+print("from sensor readings and reduces unexpected equipment downtime.")
