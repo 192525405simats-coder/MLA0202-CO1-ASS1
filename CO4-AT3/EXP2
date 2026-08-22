@@ -1,1 +1,37 @@
+# Question 2: HMM vs CRF
+# Autonomous Vehicle Activity Recognition
 
+print("=== HMM vs CRF FOR ACTIVITY RECOGNITION ===\n")
+
+# Hidden Markov Model
+print("1. Hidden Markov Model (HMM)")
+print("- State Representation: Hidden states represent driving activities")
+print("- Observation Model: Models P(observation | state)")
+print("- Learning: Maximum likelihood / Baum-Welch algorithm")
+print("- Prediction: Viterbi algorithm")
+print("- Accuracy: Good for simple sequential patterns")
+print("- Context: Limited contextual feature handling")
+print("- Efficiency: Fast for small models")
+print("- Scalability: Less suitable for complex feature-rich data")
+
+# Conditional Random Field
+print("\n2. Conditional Random Field (CRF)")
+print("- State Representation: Labels directly represent activities")
+print("- Observation Model: Directly models P(labels | observations)")
+print("- Learning: Maximum likelihood with optimization")
+print("- Prediction: Viterbi / dynamic programming")
+print("- Accuracy: Usually better with rich sensor features")
+print("- Context: Handles multiple contextual features")
+print("- Efficiency: More computationally expensive than HMM")
+print("- Scalability: Better for complex feature-rich sequences")
+
+# Comparison
+print("\n3. Comparison")
+print("HMM: Generative model with strong independence assumptions")
+print("CRF: Discriminative model that uses rich contextual features")
+
+print("\n4. Recommendation")
+print("CRF is more suitable for autonomous vehicle activity recognition.")
+print("Reason: Vehicle sensor data contains multiple contextual features.")
+print("CRF can combine speed, acceleration, steering, braking and other")
+print("sensor information to produce accurate activity labels.")
