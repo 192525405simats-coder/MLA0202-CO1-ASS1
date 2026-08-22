@@ -1,1 +1,35 @@
+# Question 3: Directed Graphical Model vs Undirected Graphical Model
+# Financial Risk Prediction
 
+print("=== BAYESIAN NETWORK vs MARKOV RANDOM FIELD ===\n")
+
+# Bayesian Network
+print("1. Directed Graphical Model (Bayesian Network)")
+print("- Graph: Directed Acyclic Graph")
+print("- Dependencies: Directed and causal dependencies")
+print("- Inference: Variable elimination, belief propagation")
+print("- Learning: Maximum likelihood / Bayesian parameter learning")
+print("- Generalization: Good when causal relationships are known")
+print("- Computation: Can be expensive for large networks")
+print("- Finance: Useful for credit risk and fraud prediction")
+
+# MRF
+print("\n2. Undirected Graphical Model (MRF)")
+print("- Graph: Undirected graph")
+print("- Dependencies: Symmetric relationships")
+print("- Inference: Belief propagation / Gibbs sampling")
+print("- Learning: Maximum likelihood using potential functions")
+print("- Generalization: Useful for highly interconnected variables")
+print("- Computation: Can be expensive for dense graphs")
+print("- Finance: Useful when relationships are non-directional")
+
+# Comparison
+print("\n3. Comparison")
+print("Bayesian Network -> Directed, causal and interpretable")
+print("MRF -> Undirected, symmetric and relationship-focused")
+
+print("\n4. Recommendation")
+print("Bayesian Network is more effective for financial risk prediction.")
+print("Reason: Financial risk can be represented using causal relationships")
+print("such as income -> credit score -> loan default. Bayesian Networks")
+print("also provide probability-based risk estimates and are interpretable.")
