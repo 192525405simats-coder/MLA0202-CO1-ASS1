@@ -1,1 +1,35 @@
+# Question 1: Bayesian Network vs Markov Random Field
+# Healthcare Disease Diagnosis
 
+print("=== BAYESIAN NETWORK vs MARKOV RANDOM FIELD ===\n")
+
+# Bayesian Network
+print("1. Bayesian Network (BN)")
+print("- Graph: Directed Acyclic Graph (DAG)")
+print("- Dependencies: Represents cause-effect relationships")
+print("- Conditional Independence: Based on parent-child relationships")
+print("- Inference: Variable elimination / belief propagation")
+print("- Uncertainty: Uses conditional probability tables (CPTs)")
+print("- Complexity: Can become expensive with many variables")
+print("- Application: Disease -> Symptoms -> Diagnosis")
+
+# MRF
+print("\n2. Markov Random Field (MRF)")
+print("- Graph: Undirected graph")
+print("- Dependencies: Represents symmetric relationships")
+print("- Conditional Independence: Based on neighboring nodes")
+print("- Inference: Belief propagation / Gibbs sampling")
+print("- Uncertainty: Uses potential functions")
+print("- Complexity: Inference can be computationally expensive")
+print("- Application: Useful when relationships have no clear direction")
+
+# Comparison
+print("\n3. Comparison")
+print("BN: Directed graph, causal relationships, CPT-based inference")
+print("MRF: Undirected graph, symmetric relationships, potential functions")
+
+print("\n4. Recommendation")
+print("Bayesian Network is more suitable for healthcare disease diagnosis.")
+print("Reason: Diseases cause symptoms, so causal relationships can be")
+print("naturally represented using a directed graph. BN also provides")
+print("interpretable probabilities for diagnosis and handles uncertainty well.")
