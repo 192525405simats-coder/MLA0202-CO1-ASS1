@@ -1,1 +1,57 @@
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.datasets import make_classification
 
+# Simulate 1,000,000 patient records
+X, y = make_classification(
+    n_samples=1_000_000,
+    n_features=10,
+    n_informative=6,
+    n_redundant=2,
+    random_state=42
+)
+
+# Select a manageable stratified sample
+sample_size = 100000
+
+X_sample, _, y_sample, _ = train_test_split(
+    X, y,
+    train_size=sample_size,
+    stratify=y,
+    random_state=42
+)
+
+print("Total records:", len(X))
+print("Sample records:", len(X_sample))
+
+# Train/test split while preserving categories
+X_train, X_test, y_train, y_test = train_test_split(
+    X_sample,
+    y_sample,
+    test_size=0.2,
+    stratify=y_sample,
+    random_state=42
+)
+
+# Train model
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42,
+    n_jobs=-1
+)
+
+model.fit(X_train, y_train)
+
+# Prediction
+prediction = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, prediction)
+
+print("Model Accuracy:", round(accuracy * 100, 2), "%")
+
+if accuracy >= 0.95:
+    print("Accuracy requirement satisfied.")
+else:
+    print("Increase sample size or tune the model.")
