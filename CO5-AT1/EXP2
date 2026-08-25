@@ -1,1 +1,47 @@
+import math
+import random
 
+# 5 advertisements
+true_probabilities = [0.05, 0.08, 0.12, 0.10, 0.15]
+
+K = 5
+N = 10000
+
+counts = [0] * K
+rewards = [0] * K
+total_reward = 0
+
+for t in range(1, N + 1):
+
+    # Select every advertisement once initially
+    if t <= K:
+        ad = t - 1
+    else:
+        ucb = []
+
+        for i in range(K):
+            average = rewards[i] / counts[i]
+            confidence = math.sqrt(2 * math.log(t) / counts[i])
+            ucb.append(average + confidence)
+
+        ad = max(range(K), key=lambda i: ucb[i])
+
+    # Simulate user click
+    reward = 1 if random.random() < true_probabilities[ad] else 0
+
+    counts[ad] += 1
+    rewards[ad] += reward
+    total_reward += reward
+
+print("Advertisement Results")
+
+for i in range(K):
+    print(
+        "Ad", i + 1,
+        "Shown:", counts[i],
+        "Clicks:", rewards[i],
+        "Estimated CTR:", round(rewards[i] / counts[i], 4)
+    )
+
+print("\nTotal Clicks:", total_reward)
+print("Best Advertisement:", max(range(K), key=lambda i: rewards[i] / counts[i]) + 1)
