@@ -1,1 +1,109 @@
+import random
 
+# Grid: 0 = free, 1 = obstacle
+grid = [
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 1, 0, 1, 0],
+    [0, 0, 0, 0, 0]
+]
+
+start = (0, 0)
+goal = (4, 4)
+
+actions = {
+    "U": (-1, 0),
+    "D": (1, 0),
+    "L": (0, -1),
+    "R": (0, 1)
+}
+
+gamma = 0.9
+V = { (r, c): 0 for r in range(5) for c in range(5)
+      if grid[r][c] == 0 }
+
+def next_state(state, action):
+    r, c = state
+    dr, dc = actions[action]
+    nr, nc = r + dr, c + dc
+
+    if nr < 0 or nr >= 5 or nc < 0 or nc >= 5:
+        return state
+
+    if grid[nr][nc] == 1:
+        return state
+
+    return (nr, nc)
+
+# Value Iteration
+for _ in range(100):
+    newV = V.copy()
+
+    for state in V:
+        if state == goal:
+            continue
+
+        values = []
+
+        for action in actions:
+            intended = next_state(state, action)
+
+            # 80% intended movement, 20% stay
+            value = 0.8 * (-1 + gamma * V[intended])
+            value += 0.2 * (-1 + gamma * V[state])
+
+            if intended == goal:
+                value += 100 * 0.8
+
+            values.append(value)
+
+        newV[state] = max(values)
+
+    V = newV
+
+# Extract optimal policy
+policy = {}
+
+for state in V:
+    if state == goal:
+        policy[state] = "GOAL"
+        continue
+
+    best_action = max(
+        actions,
+        key=lambda a: -1 + gamma * V[next_state(state, a)]
+    )
+    policy[state] = best_action
+
+print("Optimal Navigation Policy:")
+for r in range(5):
+    print([policy.get((r, c), "#") for c in range(5)])
+
+# ε-greedy exploration demonstration
+epsilon = 0.1
+
+state = start
+battery = 30
+
+print("\nRobot Navigation:")
+
+for step in range(25):
+    if state == goal:
+        print("Destination reached!")
+        break
+
+    if random.random() < epsilon:
+        action = random.choice(list(actions))
+    else:
+        action = policy[state]
+
+    state = next_state(state, action)
+    battery -= 1
+
+    print("Step:", step + 1, "Action:", action,
+          "Position:", state, "Battery:", battery)
+
+    if battery <= 0:
+        print("Battery exhausted!")
+        break
