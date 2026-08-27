@@ -1,1 +1,122 @@
+def value_iteration(grid, rewards, gamma=0.9, threshold=0.001):
+    rows = len(grid)
+    cols = len(grid[0])
 
+    actions = {
+        "UP": (-1, 0),
+        "DOWN": (1, 0),
+        "LEFT": (0, -1),
+        "RIGHT": (0, 1)
+    }
+
+    # Initialize value function
+    V = {}
+
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] != "#":
+                V[(r, c)] = 0.0
+
+    while True:
+        delta = 0
+
+        for state in V:
+            r, c = state
+
+            # Terminal state
+            if grid[r][c] == "G":
+                continue
+
+            best_value = float("-inf")
+
+            for action, (dr, dc) in actions.items():
+                nr = r + dr
+                nc = c + dc
+
+                # Check boundaries and obstacles
+                if (
+                    nr < 0 or nr >= rows or
+                    nc < 0 or nc >= cols or
+                    grid[nr][nc] == "#"
+                ):
+                    next_state = state
+                else:
+                    next_state = (nr, nc)
+
+                value = rewards[next_state] + gamma * V[next_state]
+
+                best_value = max(best_value, value)
+
+            delta = max(delta, abs(V[state] - best_value))
+            V[state] = best_value
+
+        # Check convergence
+        if delta < threshold:
+            break
+
+    # Extract optimal policy
+    policy = {}
+
+    for state in V:
+        r, c = state
+
+        if grid[r][c] == "G":
+            policy[state] = "GOAL"
+            continue
+
+        best_action = None
+        best_value = float("-inf")
+
+        for action, (dr, dc) in actions.items():
+            nr = r + dr
+            nc = c + dc
+
+            if (
+                nr < 0 or nr >= rows or
+                nc < 0 or nc >= cols or
+                grid[nr][nc] == "#"
+            ):
+                next_state = state
+            else:
+                next_state = (nr, nc)
+
+            value = rewards[next_state] + gamma * V[next_state]
+
+            if value > best_value:
+                best_value = value
+                best_action = action
+
+        policy[state] = best_action
+
+    return V, policy
+
+
+# Example warehouse grid
+grid = [
+    ["S", ".", ".", "."],
+    [".", "#", ".", "."],
+    [".", ".", ".", "."],
+    [".", ".", "#", "G"]
+]
+
+# Rewards for each state
+rewards = {}
+
+for r in range(len(grid)):
+    for c in range(len(grid[0])):
+        if grid[r][c] == "#":
+            continue
+        elif grid[r][c] == "G":
+            rewards[(r, c)] = 10
+        else:
+            rewards[(r, c)] = -1
+
+V, policy = value_iteration(grid, rewards)
+
+print("Optimal Value Function:")
+for state, value in V.items():
+    print(state, ":", round(value, 3))
+
+print("\nOptimal Policy:")
+for state, action in policy.items():
+    print(state, ":", action)
