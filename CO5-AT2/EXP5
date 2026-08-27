@@ -1,1 +1,157 @@
+def policy_iteration(grid, rewards, gamma=0.9, threshold=0.001):
+    rows = len(grid)
+    cols = len(grid[0])
 
+    actions = {
+        "UP": (-1, 0),
+        "DOWN": (1, 0),
+        "LEFT": (0, -1),
+        "RIGHT": (0, 1)
+    }
+
+    states = []
+
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] != "#":
+                states.append((r, c))
+
+    # Initialize random policy
+    policy = {}
+
+    for state in states:
+        if grid[state[0]][state[1]] == "G":
+            policy[state] = "GOAL"
+        else:
+            policy[state] = random.choice(list(actions.keys()))
+
+    # Initialize value function
+    V = {state: 0.0 for state in states}
+
+    while True:
+
+        # -------------------------
+        # Policy Evaluation
+        # -------------------------
+        while True:
+            delta = 0
+
+            for state in states:
+
+                r, c = state
+
+                if grid[r][c] == "G":
+                    continue
+
+                action = policy[state]
+                dr, dc = actions[action]
+
+                nr = r + dr
+                nc = c + dc
+
+                # Check boundaries and obstacles
+                if (
+                    nr < 0 or nr >= rows or
+                    nc < 0 or nc >= cols or
+                    grid[nr][nc] == "#"
+                ):
+                    next_state = state
+                else:
+                    next_state = (nr, nc)
+
+                new_value = rewards[next_state] + gamma * V[next_state]
+
+                delta = max(
+                    delta,
+                    abs(V[state] - new_value)
+                )
+
+                V[state] = new_value
+
+            if delta < threshold:
+                break
+
+        # -------------------------
+        # Policy Improvement
+        # -------------------------
+        policy_stable = True
+
+        for state in states:
+
+            r, c = state
+
+            if grid[r][c] == "G":
+                continue
+
+            old_action = policy[state]
+
+            best_action = None
+            best_value = float("-inf")
+
+            for action, (dr, dc) in actions.items():
+
+                nr = r + dr
+                nc = c + dc
+
+                if (
+                    nr < 0 or nr >= rows or
+                    nc < 0 or nc >= cols or
+                    grid[nr][nc] == "#"
+                ):
+                    next_state = state
+                else:
+                    next_state = (nr, nc)
+
+                value = rewards[next_state] + gamma * V[next_state]
+
+                if value > best_value:
+                    best_value = value
+                    best_action = action
+
+            policy[state] = best_action
+
+            if old_action != best_action:
+                policy_stable = False
+
+        # Stop when policy does not change
+        if policy_stable:
+            break
+
+    return V, policy
+
+
+# Example drone navigation grid
+grid = [
+    ["S", ".", ".", "."],
+    [".", "#", ".", "."],
+    [".", ".", ".", "."],
+    [".", ".", "#", "G"]
+]
+
+# Rewards
+rewards = {}
+
+for r in range(len(grid)):
+    for c in range(len(grid[0])):
+        if grid[r][c] == "#":
+            continue
+        elif grid[r][c] == "G":
+            rewards[(r, c)] = 10
+        else:
+            rewards[(r, c)] = -1
+
+
+# Run policy iteration
+V, policy = policy_iteration(
+    grid,
+    rewards,
+    gamma=0.9
+)
+
+print("Optimal Value Function:")
+for state, value in V.items():
+    print(state, ":", round(value, 3))
+
+print("\nOptimal Policy:")
+for state, action in policy.items():
+    print(state, ":", action)
