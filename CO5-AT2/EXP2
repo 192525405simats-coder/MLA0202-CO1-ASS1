@@ -1,1 +1,57 @@
+import random
 
+def epsilon_greedy(num_movies, num_interactions, epsilon):
+    # Initialize total rewards and number of selections
+    total_rewards = [0.0] * num_movies
+    counts = [0] * num_movies
+
+    for interaction in range(num_interactions):
+
+        # Exploration or exploitation
+        if random.random() < epsilon:
+            # Exploration: choose a random movie
+            movie = random.randint(0, num_movies - 1)
+        else:
+            # Exploitation: choose movie with highest estimated reward
+            estimates = []
+
+            for i in range(num_movies):
+                if counts[i] == 0:
+                    estimates.append(0)
+                else:
+                    estimates.append(total_rewards[i] / counts[i])
+
+            movie = estimates.index(max(estimates))
+
+        # Simulate user engagement/reward
+        reward = random.uniform(0, 1)
+
+        # Update reward information
+        counts[movie] += 1
+        total_rewards[movie] += reward
+
+    # Calculate final expected rewards
+    estimated_rewards = []
+
+    for i in range(num_movies):
+        if counts[i] == 0:
+            estimated_rewards.append(0)
+        else:
+            estimated_rewards.append(total_rewards[i] / counts[i])
+
+    # Best movie
+    best_movie = estimated_rewards.index(max(estimated_rewards))
+
+    print("Estimated rewards:", estimated_rewards)
+    print("Best movie:", best_movie + 1)
+    print("Highest expected reward:", estimated_rewards[best_movie])
+
+    return best_movie, estimated_rewards
+
+
+# Example
+epsilon_greedy(
+    num_movies=5,
+    num_interactions=1000,
+    epsilon=0.1
+)
